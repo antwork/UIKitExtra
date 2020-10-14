@@ -27,11 +27,18 @@ private var UIKitExtraButtonCustomActionKey: UInt8 = 1
 
 extension UIControl {
     
-    public func eAddAction(block: UIKitExtraActionBlock?) {
+    public func eAddAction(block: UIKitExtraActionBlock?, controlEvents: UIControl.Event? = nil) {
         objc_setAssociatedObject(self as Any, &UIKitExtraButtonCustomActionKey, block, .OBJC_ASSOCIATION_COPY_NONATOMIC)
         
+        var events = controlEvents ?? .touchUpInside
+        if controlEvents == nil {
+            if self is UISwitch || self is UIRefreshControl {
+                events = .valueChanged
+            }
+        }
+        
         self.removeTarget(self, action: nil, for: .touchUpInside)
-        addTarget(self, action: #selector(eHandleCustomActionBlock(_:)), for: .touchUpInside)
+        addTarget(self, action: #selector(eHandleCustomActionBlock(_:)), for: events)
     }
     
     private func eActionBlock() -> UIKitExtraActionBlock? {
