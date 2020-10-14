@@ -1,5 +1,5 @@
 //
-//  UIKitExtra.swift
+//  UIGestureRecognizer+Block.swift
 //
 //  Created by Xu Qiang on 10/14/20.
 //
@@ -21,6 +21,24 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 
-import Foundation
+import UIKit
 
-public typealias UIKitExtraActionBlock = (Any) -> Void
+private var UIKitExtraGesutureCustomActionKey: UInt8 = 1
+
+extension UIGestureRecognizer {
+    
+    public func eAddAction(block: UIKitExtraActionBlock?) {
+        objc_setAssociatedObject(self as Any, &UIKitExtraGesutureCustomActionKey, block, .OBJC_ASSOCIATION_COPY_NONATOMIC)
+        
+        self.removeTarget(self, action: nil)
+        self.addTarget(self, action: #selector(eHandleCustomActionBlock(_:)))
+    }
+    
+    private func eActionBlock() -> UIKitExtraActionBlock? {
+        return objc_getAssociatedObject(self as Any, &UIKitExtraGesutureCustomActionKey) as? UIKitExtraActionBlock
+    }
+    
+    @objc private func eHandleCustomActionBlock(_ sender: UIButton) {
+        eActionBlock()?(self)
+    }
+}
